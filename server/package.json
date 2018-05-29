@@ -1,0 +1,25 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "GraphQL Express App",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "GraphQL",
+    "Express",
+    "NodeJS"
+  ],
+  "author": "Humphrey Hills",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "express-graphql": "^0.6.12",
+    "graphiql": "^0.11.11",
+    "graphql": "^0.13.2",
+    "lodash": "^4.17.10",
+    "mongoose": "^5.1.2"
+  }
+}
