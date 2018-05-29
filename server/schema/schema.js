@@ -1,4 +1,4 @@
-// video 29
+// GraphQL Tutorial #35 - Making a Single Query
 /** note: For production run in express server */
 /** will describe the on this kind of graph
  * the object types the relations between those object types
