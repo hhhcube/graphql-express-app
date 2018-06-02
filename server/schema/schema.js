@@ -15,24 +15,26 @@ const {GraphQLObjectType,
         GraphQLString, GraphQLSchema, 
         GraphQLID, GraphQLInt,
         GraphQLList, GraphQLNonNull} = graphql;
-// dummy data ---------------------------------
-/*
-var books = [                                               // relation type
-    { name: 'Name of the Wind', genre: 'Fantasy', id: '1', authorId: '1' },
-    { name: 'The Final Empire', genre: 'Fantasy', id: '2', authorId: '2' },
-    { name: 'The Hero of Ages', genre: 'Fantasy', id: '4', authorId: '2' },
-    { name: 'The Long Earth', genre: 'Sci-Fi', id: '3', authorId: '3' },
-    { name: 'The Colour of Magic', genre: 'Fantasy', id: '5', authorId: '3' },
-    { name: 'The Light Fantastic', genre: 'Fantasy', id: '6', authorId: '3' },
-];
-var authors = [
-    { name: 'Patrick Rothfuss', age: 44, id: '1' },
-    { name: 'Brandon Sanderson', age: 42, id: '2' },
-    { name: 'Terry Pratchett', age: 66, id: '3' }
-];
-*/
-// --------------------------------------------
-
+// -------------------------------------------
+const BookType = new GraphQLObjectType({
+    name: 'Book',
+    fields: ( ) => ({
+        id: { type: GraphQLID},
+        name: {type: GraphQLString},
+        genre: {type: GraphQLString},
+        author: { // nested and related data -> parent = 
+            // 2. define relationships
+            type: AuthorType,
+            resolve(parent, args){
+                // console.log(parent, "parent");
+                // Look in the authors array and find a author whos parent (which is the book we queried)
+                // whos id (the book that was queried) mathces the authorId. - parent is the books aray.
+                // return _.find(authors, {id: parent.authorId}); // parent.authorId == books.authorId
+                return Author.findById(parent.authorId);
+            }
+        }
+    })
+});
 const AuthorType = new GraphQLObjectType({
     name: 'Author',
     // have to rap the fields property inside of a function
@@ -44,7 +46,7 @@ const AuthorType = new GraphQLObjectType({
         // relation type
         books: {
             type: new GraphQLList(BookType),
-           resolve(parent, args){      // is authorId == parnet.id
+            resolve(parent, args){      // is authorId == parnet.id
                 //return _.filter(books, {authorId: parent.id});
                 return Book.find({
                     authorId: parent.id
@@ -53,25 +55,7 @@ const AuthorType = new GraphQLObjectType({
         }
     })
 });
-const BookType = new GraphQLObjectType({
-    name: 'Book',
-    fields: ( ) => ({
-        id: { type: GraphQLID},
-        name: {type: GraphQLString},
-        genre: {type: GraphQLString},
-        author: { // nested and related data -> parent = 
-            // 2. define relationships
-            type: AuthorType,
-           resolve(parent, args){
-                // console.log(parent);
-                // Look in the authors array and find a author whos parent (which is the book we queried)
-                // whos id (the book that was queried) mathces the authorId. - parent is the books aray.
-                // return _.find(authors, {id: parent.authorId}); // parent.authorId == books.authorId
-                return Author.findById(parent.authorId);
-            }
-        }
-    })
-});
+
 // 3. define root queries
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
@@ -80,7 +64,7 @@ const RootQuery = new GraphQLObjectType({
             type: BookType,
             // define which args should come with query 'book'
             args: {id: {type: GraphQLID}},
-           resolve(parent, args){
+            resolve(parent, args){
                 // code to get data from db/other source
                 //console.log(typeof(args.id));
                 // npm install lodash
@@ -90,7 +74,7 @@ const RootQuery = new GraphQLObjectType({
         },
         author: {
             type: AuthorType,
-            args: {id:{type:GraphQLID}},
+            args: {id: { type: GraphQLID }},
             resolve(parent, args){
                // return _.find(authors, {id: args.id});
                 return Author.findById(args.id);
@@ -98,14 +82,14 @@ const RootQuery = new GraphQLObjectType({
         },
         books: {
             type: new GraphQLList(BookType),
-            resolve(parent, args){      // is authorId == parnet.id
+            resolve(parent, args){      // is authorId == parent.id
            //     return books;
                 return Book.find({});
             }
         },
         authors: {
             type: new GraphQLList(AuthorType),
-            resolve(parent, args){      // is authorId == parnet.id
+            resolve(parent, args){      // is authorId == parent.id
              //   return authors;
                 return Author.find({});
             }
@@ -153,8 +137,7 @@ const Mutation = new GraphQLObjectType({
 // create a model and schema for each dataType we will be
 // storing in our database 
 module.exports = new GraphQLSchema({
-    query: RootQuery,
-    // were saying a user can query using these root queries right here
-    // and it can perform mutations using this mutation thing right here
-    mutation: Mutation
+    query: RootQuery, // were saying a user can query using these root queries right here
+    mutation: Mutation // and it can perform mutations using this mutation thing right here
+   
 });
